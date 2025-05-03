@@ -68,6 +68,12 @@
   --radius-20: 20px;
 }
 
+@layer base {
+  .emoji-font {
+    font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "EmojiOne Color", "Android Emoji", sans-serif;
+  }
+}
+
 @layer components {
   .error {
     @apply text-red-500 text-base font-medium text-center;

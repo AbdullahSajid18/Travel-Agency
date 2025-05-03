@@ -66,7 +66,6 @@ const AllUsers = ({loaderData}: Route.ComponentProps) => {
           />
         </ColumnsDirective>
       </GridComponent>
-      All Users Page Contents
     </main>
   );
 };
