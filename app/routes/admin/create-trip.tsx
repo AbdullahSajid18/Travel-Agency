@@ -19,7 +19,7 @@ export const loader = async () => {
   const data = await response.json();
 
   return data.map((country: any) => ({
-    name: country.name.common,
+    name:country.name.common,
     coordinates: country.latlng,
     value: country.name.common,
     openStreetMap: country.maps?.openStreetMap,
@@ -41,8 +41,8 @@ const CreateTrip = ({ loaderData }: Route.ComponentProps) => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setLoading(true);
 
     if (
@@ -50,10 +50,9 @@ const CreateTrip = ({ loaderData }: Route.ComponentProps) => {
       !formData.travelStyle ||
       !formData.interest ||
       !formData.budget ||
-      !formData.duration ||
       !formData.groupType
     ) {
-      setError("Please fill all fields");
+      setError("Please provide values for all fields");
       setLoading(false);
       return;
     }
@@ -65,18 +64,35 @@ const CreateTrip = ({ loaderData }: Route.ComponentProps) => {
     }
     const user = await account.get();
     if (!user.$id) {
-      console.error("user not authenticated");
+      console.error("User not authenticated");
       setLoading(false);
       return;
     }
 
     try {
-      console.log('user', user);
-      console.log('formData', formData);
-      
-      
-    } catch (error) {
-      console.error("Error generating trip:", error);
+      const response = await fetch("/api/create-trip", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          country: formData.country,
+          numberOfDays: formData.duration,
+          travelStyle: formData.travelStyle,
+          interests: formData.interest,
+          budget: formData.budget,
+          groupType: formData.groupType,
+          userId: user.$id,
+        }),
+      });
+
+      const result: CreateTripResponse = await response.json();
+
+      if (result?.id) {
+        navigate(`/trips/${result.id}`);
+      } else {
+        console.error("Failed to generate a trip");
+      }
+    } catch (e) {
+      console.error("Error generating trip", e);
     } finally {
       setLoading(false);
     }
@@ -85,7 +101,6 @@ const CreateTrip = ({ loaderData }: Route.ComponentProps) => {
   const handleChange = (key: keyof TripFormData, value: string | number) => {
     setFormData({ ...formData, [key]: value });
   };
-
   const countryData = countries.map((country) => ({
     text: country.name,
     value: country.value,
@@ -197,7 +212,7 @@ const CreateTrip = ({ loaderData }: Route.ComponentProps) => {
                   dataSource={mapData}
                   shapePropertyPath="name"
                   shapeDataPath="country"
-                  shapeSettings={{ colorValuePath: "color", fill: "#e5e5e5" }}
+                  shapeSettings={{ colorValuePath: "color", fill: "#E5E5E5" }}
                 />
               </LayersDirective>
             </MapsComponent>
@@ -220,11 +235,10 @@ const CreateTrip = ({ loaderData }: Route.ComponentProps) => {
                 src={`/assets/icons/${
                   loading ? "loader.svg" : "magic-star.svg"
                 }`}
-                alt="magic star"
-                className={cn("size-5", loading && "animate-spin")}
+                className={cn("size-5", { "animate-spin": loading })}
               />
               <span className="p-16-semibold text-white">
-                {loading ? "Generatiing" : "Generate Trip"}
+                {loading ? "Generating..." : "Generate Trip"}
               </span>
             </ButtonComponent>
           </footer>
