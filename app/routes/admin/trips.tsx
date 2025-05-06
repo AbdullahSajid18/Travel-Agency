@@ -68,6 +68,7 @@ const Trips = ({ loaderData }: Route.ComponentProps) => {
           cssClass="!mb-4"
         />
       </section>
+      
     </main>
   );
 };
